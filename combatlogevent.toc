@@ -1,0 +1,8 @@
+## Interface: 100050
+## Title: Range Counter
+## Notes: Counts out of range messages
+## Version: 1.0
+## Author: vpontual
+## SavedVariables: RangeCounterDB
+
+combatlogevent.lua
