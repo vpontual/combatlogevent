@@ -1,4 +1,5 @@
-local addonName = "RangeCounter"
+local addonName = "CombatLogEvent"
+addon.version = "1.0.0"
 
 -- Message categories and their patterns
 local messageTypes = {
