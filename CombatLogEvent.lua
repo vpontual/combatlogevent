@@ -67,6 +67,13 @@ local function InitializeSavedVars()
     end
 end
 
+-- Debug print function
+local function DebugPrint(...)
+    if addon.debug then
+        print(string.format("|cFF00FF00%s Debug:|r", addonName), ...)
+    end
+end
+
 -- Generic message handler for UI errors
 local function ProcessErrorMessage(errorType, message)
     if not message then return end
