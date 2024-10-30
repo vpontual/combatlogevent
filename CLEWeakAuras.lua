@@ -102,52 +102,89 @@ local function CreateWeakAurasDisplay(msgType, config)
     return display
 end
 
--- Update the WeakAura module settings when a new message is caught
+-- Initialize WeakAuras integration
+local function InitializeWeakAuras()
+    -- Ensure WeakAuras exists
+    if not WeakAuras then
+        print(string.format("|cFFFF0000%s:|r WeakAuras addon not found!", addonName))
+        return false
+    end
+    
+    -- Create displays for each message type
+    for msgType, config in pairs(icons) do
+        if addon.messageTypes[msgType] then
+            local display = CreateWeakAurasDisplay(msgType, config)
+            displays[msgType] = display
+            
+            -- Register display with WeakAuras
+            if WeakAuras.Add then
+                WeakAuras.Add(display)
+            else
+                print(string.format("|cFFFF0000%s:|r Error registering WeakAuras display for %s", 
+                    addonName, msgType))
+            end
+        end
+    end
+    
+    return true
+end
+
+-- Update WeakAuras display when a message is processed
+local function UpdateDisplay(msgType)
+    if displays[msgType] and WeakAuras.ScanEvents then
+        WeakAuras.ScanEvents("CLE_MESSAGE", {msgType = msgType})
+    end
+end
+
+-- Hook into the main addon's message processors
+local originalProcessErrorMessage = ProcessErrorMessage
 function ProcessErrorMessage(errorType, message)
-    -- ...
+    local result = originalProcessErrorMessage(errorType, message)
+    
+    -- Check if any patterns matched and update corresponding display
     for msgType, data in pairs(addon.messageTypes) do
-        if icons[msgType] then
-            weakaura:SetModule(msgType, {
-                name = icons[msgType].name,
-                texture = icons[msgType].texture,
-                color = icons[msgType].color,
-                size = icons[msgType].size,
-                scale = icons[msgType].scale,
-                show = icons[msgType].show,
-                hide = icons[msgType].hide,
-            })
+        if data.eventType == "error" then
+            for _, pattern in ipairs(data.patterns) do
+                if message:lower():find(pattern, 1, true) then
+                    UpdateDisplay(msgType)
+                    break
+                end
+            end
         end
     end
+    
+    return result
 end
 
--- Update the WeakAura module settings when a new combat log event is caught
+local originalProcessCombatLogEvent = ProcessCombatLogEvent
 function ProcessCombatLogEvent(...)
-    -- ...
+    local result = originalProcessCombatLogEvent(...)
+    
+    local timestamp, eventType = ...
+    
+    -- Check if any patterns matched and update corresponding display
     for msgType, data in pairs(addon.messageTypes) do
-        if icons[msgType] then
-            weakaura:SetModule(msgType, {
-                name = icons[msgType].name,
-                texture = icons[msgType].texture,
-                color = icons[msgType].color,
-                size = icons[msgType].size,
-                scale = icons[msgType].scale,
-                show = icons[msgType].show,
-                hide = icons[msgType].hide,
-            })
+        if data.eventType == "combat" then
+            for _, pattern in ipairs(data.patterns) do
+                if eventType == pattern then
+                    UpdateDisplay(msgType)
+                    break
+                end
+            end
         end
     end
+    
+    return result
 end
 
--- Load the WeakAuras companion file if it's available and enabled by the user
-local function LoadWeakAurasCompanion()
-    local weakaurasEnabled, _ = GetAddOnMetadata("WeakAuras", "Enabled")
-    if weakaurasEnabled then
-        dofile("ConditionCounterWeakAuras.lua")
+-- Function to load WeakAuras integration
+function LoadWeakAurasCompanion()
+    local loaded = InitializeWeakAuras()
+    if loaded then
+        print(string.format("|cFF00FF00%s:|r WeakAuras integration loaded successfully!", addonName))
     end
 end
 
--- Call the load function when the addon is enabled
-function frame:PLAYER_LOGIN(event)
-    -- ...
-    LoadWeakAurasCompanion()
-end
+-- Export functions for use in main addon
+addon.LoadWeakAurasCompanion = LoadWeakAurasCompanion
+addon.UpdateWeakAurasDisplay = UpdateDisplay
