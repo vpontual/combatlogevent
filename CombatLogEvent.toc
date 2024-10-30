@@ -2,8 +2,10 @@
 ## Title: Combat Log Event Counter
 ## Notes: Counts combat events and out of range messages
 ## Author: VeePee
-## Version: 1.2
+## Version: 1.2.0
 ## DefaultState: Enabled
 ## SavedVariables: ConditionCounterDB
+## OptionalDeps: WeakAuras
 
 CombatLogEvent.lua
+CLEWeakAuras.lua
