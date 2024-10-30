@@ -9,7 +9,7 @@ local addonName, addon = ...
 local icons = {
     rangeError = {
         name = "Range Error",
-        texture = "Interface\\AddOns\\ConditionCounter\\media\\range_error_icon",
+        texture = "Interface\\AddOns\\CombatLogEvent\\media\\range_error_icon",
         color = { 1, 0, 0 },
         size = 32,
         scale = 1.5,
@@ -18,7 +18,7 @@ local icons = {
     },
     facingError = {
         name = "Facing Error",
-        texture = "Interface\\AddOns\\ConditionCounter\\media\\facing_error_icon",
+        texture = "Interface\\AddOns\\CombatLogEvent\\media\\facing_error_icon",
         color = { 0, 1, 0 },
         size = 32,
         scale = 1.5,
@@ -27,7 +27,7 @@ local icons = {
     },
     interrupted = {
         name = "Interrupted",
-        texture = "Interface\\AddOns\\ConditionCounter\\media\\interrupted_icon",
+        texture = "Interface\\AddOns\\CombatLogEvent\\media\\interrupted_icon",
         color = { 0, 0, 1 },
         size = 32,
         scale = 1.5,
