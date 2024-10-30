@@ -46,9 +46,9 @@ addon.messageTypes = {
 
 -- Initialize saved variables
 local function InitializeSavedVars()
-    if not RangeCounterDB then
-        RangeCounterDB = {
-            messageTypes = {},
+    if not ConditionCounterDB then
+        ConditionCounterDB = {
+            conditionTypes = {},
             settings = {
                 enableSound = true,
                 enableWarnings = true,
@@ -58,19 +58,12 @@ local function InitializeSavedVars()
     
     -- Initialize counters from saved data
     for msgType, data in pairs(addon.messageTypes) do
-        if not RangeCounterDB.messageTypes[msgType] then
-            RangeCounterDB.messageTypes[msgType] = {
+        if not ConditionCounterDB.conditionTypes[msgType] then
+            ConditionCounterDB.conditionTypes[msgType] = {
                 count = 0,
             }
         end
-        data.count = RangeCounterDB.messageTypes[msgType].count
-    end
-end
-
--- Debug function
-local function DebugPrint(...)
-    if addon.debug then
-        print("|cFFFF0000Debug:|r", ...)
+        data.count = ConditionCounterDB.conditionTypes[msgType].count
     end
 end
 
@@ -165,7 +158,7 @@ function frame:PLAYER_LOGIN(event)
         addonName, addon.version))
 end
 
--- THIS IS THE KEY CHANGE: Handle both arguments from UI_ERROR_MESSAGE
+-- Handle both arguments from UI_ERROR_MESSAGE
 function frame:UI_ERROR_MESSAGE(event, errorType, message)
     ProcessErrorMessage(errorType, message)
 end
