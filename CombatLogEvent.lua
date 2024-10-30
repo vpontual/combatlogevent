@@ -134,7 +134,7 @@ local function ProcessCombatLogEvent(...)
                     end
                     
                     data.count = data.count + 1
-                    RangeCounterDB.messageTypes[msgType].count = data.count
+                    ConditionCounterDB.messageTypes[msgType].count = data.count
                     
                     if data.threshold and data.count >= data.threshold then
                         print(string.format("|cFF00FF00%s:|r Threshold reached for %s! Count: %d", 
@@ -191,7 +191,7 @@ end
 local function ResetCounts()
     for msgType, data in pairs(addon.messageTypes) do
         data.count = 0
-        RangeCounterDB.messageTypes[msgType].count = 0
+        ConditionCounterDB.messageTypes[msgType].count = 0
     end
     print(string.format("|cFF00FF00%s:|r Counters reset to 0", addonName))
 end
