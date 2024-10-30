@@ -5,24 +5,33 @@ addon.version = "1.0.0"
 -- Message categories and their patterns
 addon.messageTypes = {
     -- Range messages using UI error events
-    range = {
-        patterns = {
-            "out of range",
-            "is too far away",
-            "no line of sight",
-            "must be closer",
-            "not close enough",
-            "cannot reach",
-            "out of range.",
-            "too far away",
-            "target not in",
-            "cannot attack that target",
+    addon.messageTypes = {
+        -- ... (other conditions)
+        rangeError = {
+            patterns = {
+                "out of range",
+                "is too far away",
+                "no line of sight",
+                "must be closer",
+                "not close enough",
+                "cannot reach",
+                "out of range.",
+                "too far away"
+            },
+            count = 0,
+            threshold = 10,
+            eventType = "error",
+            soundFile = "range_error_sound.wav"  
         },
-        count = 0,
-        threshold = 10,
-        eventType = "error"
-    },
-    -- Combat log message type
+        facingError = {
+            patterns = {
+                "not facing the target"
+            },
+            count = 0,
+            threshold = 10,
+            eventType = "error",
+            soundFile = "facing_error_sound.wav"  
+        },    -- Combat log message type
     interrupted = {
         patterns = {
             "SPELL_INTERRUPT",
