@@ -96,11 +96,12 @@ local function ProcessErrorMessage(errorType, message)
                         PlaySoundFile(data.soundFile)
                     end
                     
-                    if data.threshold and data.count >= data.threshold then
+                    if ConditionCounterDB.settings.enableWarnings and
+                       data.threshold and data.count >= data.threshold then
                         print(string.format("|cFF00FF00%s:|r Threshold reached for %s! Count: %d", 
                             addonName, msgType, data.count))
                     end
-                    
+
                     return
                 end
             end
@@ -143,11 +144,12 @@ local function ProcessCombatLogEvent(...)
                     data.count = data.count + 1
                     ConditionCounterDB.messageTypes[msgType].count = data.count
                     
-                    if data.threshold and data.count >= data.threshold then
+                    if ConditionCounterDB.settings.enableWarnings and
+                       data.threshold and data.count >= data.threshold then
                         print(string.format("|cFF00FF00%s:|r Threshold reached for %s! Count: %d", 
                             addonName, msgType, data.count))
                     end
-                    
+
                     return
                 end
             end
@@ -163,6 +165,11 @@ function frame:PLAYER_LOGIN(event)
     InitializeSavedVars()
     print(string.format("|cFF00FF00%s v%s loaded!|r Use /cle to see totals and /cle reset to reset", 
         addonName, addon.version))
+
+    local name, _, _, _, loadable = GetAddOnInfo("WeakAuras")
+    if name and loadable then
+        LoadWeakAurasCompanion()
+    end
 end
 
 -- Handle both arguments from UI_ERROR_MESSAGE
