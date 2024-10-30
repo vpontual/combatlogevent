@@ -67,22 +67,35 @@ local function InitializeSavedVars()
             ConditionCounterDB.settings[key] = value
         end
     end
-        
+
     -- Initialize counters from saved data
     for msgType, data in pairs(addon.messageTypes) do
-        if not ConditionCounterDB.conditionTypes[msgType] then
-            ConditionCounterDB.conditionTypes[msgType] = {
-                count = 0,
-            }
-        end
+        ConditionCounterDB.conditionTypes[msgType] = ConditionCounterDB.conditionTypes[msgType] or {
+            count = 0
+        }
         data.count = ConditionCounterDB.conditionTypes[msgType].count
     end
+
+    -- Restore debug state
+    addon.debug = ConditionCounterDB.settings.debug
+
 end
 
 -- Debug print function
 local function DebugPrint(...)
     if addon.debug then
         print(string.format("|cFF00FF00%s Debug:|r", addonName), ...)
+    end
+end
+
+-- Safe sound play function
+local function PlaySoundWithCheck(soundFile)
+    if soundFile and ConditionCounterDB.settings.enableSound then
+        -- pcall to safely handle missing sound files
+        local success = pcall(PlaySoundFile, soundFile, "Master")
+        if not success and addon.debug then
+            DebugPrint("Failed to play sound file:", soundFile)
+        end
     end
 end
 
