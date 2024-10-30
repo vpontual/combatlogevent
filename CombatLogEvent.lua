@@ -213,11 +213,46 @@ function frame:OnEvent(event, ...)
     end
 end
 
--- Register events properly for both types of error messages
+-- Combat state handler
+combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+combatFrame:SetScript("OnEvent", function(self, event)
+    if ConditionCounterDB.settings.inCombatOnly then
+        if event == "PLAYER_REGEN_DISABLED" then
+            frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        else
+            frame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        end
+    end
+end)
+
+-- Register core events
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("UI_ERROR_MESSAGE")
-frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+if not ConditionCounterDB or not ConditionCounterDB.settings.inCombatOnly then
+    frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+end
 frame:SetScript("OnEvent", frame.OnEvent)
+
+-- Settings management
+local function UpdateSetting(setting, value)
+    if ConditionCounterDB.settings[setting] ~= nil then
+        ConditionCounterDB.settings[setting] = value
+        print(string.format("|cFF00FF00%s:|r %s %s", 
+            addonName, setting, value and "enabled" or "disabled"))
+            
+        -- Special handling for combat-only mode
+        if setting == "inCombatOnly" then
+            if value then
+                if not InCombatLockdown() then
+                    frame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+                end
+            else
+                frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            end
+        end
+    end
+end
 
 -- Command handling
 local function ShowHelp()
@@ -225,6 +260,9 @@ local function ShowHelp()
     print("  /cle - Show current counts")
     print("  /cle reset - Reset all counters to 0")
     print("  /cle debug - Toggle debug mode")
+    print("  /cle sound on|off - Toggle sound")
+    print("  /cle warnings on|off - Toggle warnings")
+    print("  /cle combatonly on|off - Toggle combat-only mode")
     print("  /cle help - Show this help message")
 end
 
@@ -258,14 +296,23 @@ local function SlashCommandHandler(msg)
     if msg == "reset" then
         ResetCounts()
     elseif msg == "debug" then
-        ToggleDebug()
+        UpdateSetting("debug", not ConditionCounterDB.settings.debug)
+        addon.debug = ConditionCounterDB.settings.debug
     elseif msg == "help" then
         ShowHelp()
+    elseif msg:match("^sound%s+(%w+)") then
+        local state = msg:match("^sound%s+(%w+)")
+        UpdateSetting("enableSound", state == "on")
+    elseif msg:match("^warnings%s+(%w+)") then
+        local state = msg:match("^warnings%s+(%w+)")
+        UpdateSetting("enableWarnings", state == "on")
+    elseif msg:match("^combatonly%s+(%w+)") then
+        local state = msg:match("^combatonly%s+(%w+)")
+        UpdateSetting("inCombatOnly", state == "on")
     else
         ShowCounts()
     end
 end
-
 -- Register slash commands
 SLASH_CLE1 = "/cle"
 SlashCmdList["CLE"] = SlashCommandHandler
