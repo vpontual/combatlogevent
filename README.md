@@ -10,15 +10,16 @@ Currently tracks:
 - Line of sight issues
 - Distance-related errors
 - Spell interrupts (including Counterspell)
+- Spell cast failures
 
 ## Features
 
-- Counts different types of range/distance related messages
+- Counts different types of range/distance related messages and combat log events
 - Configurable thresholds for notifications
 - Persistent counting between sessions
 - Easy to expand for additional message types
-- Combat log event support
 - Simple slash commands for interaction
+- Debug mode for detailed logging
 
 ## Installation
 
@@ -38,54 +39,15 @@ The addon responds to the following slash commands:
 
 - `/cle` - Shows current counts for all tracked message types
 - `/cle reset` - Resets all counters to zero
+- `/cle debug` - Toggles debug mode for more detailed logging
 
 ## Configuration
 
-Current thresholds and settings can be adjusted by modifying the values in the `addon.messageTypes` table in `combatlogevent.lua`:
-
-```lua
-addon.messageTypes = {
-    range = {
-        threshold = 10,  -- Adjust this value to change notification threshold
-        -- other settings...
-    },
-}
-```
+Current thresholds and settings can be adjusted by modifying the values in the `addon.messageTypes` table in `combatlogevent.lua`.
 
 ## Expanding the Addon
 
-The addon is designed to be easily expandable. To add new message types:
-
-### For UI Error Messages:
-
-```lua
-addon.messageTypes.newtype = {
-    patterns = {
-        "error message to match",
-        "another error pattern",
-    },
-    count = 0,
-    threshold = 5,
-    eventType = "error"
-}
-```
-
-### For Combat Log Events:
-
-```lua
-addon.messageTypes.newtype = {
-    patterns = {
-        "SPELL_CAST_SUCCESS",  -- Combat log event type
-        "SPELL_CAST_FAILED",   -- Can add multiple event types
-    },
-    count = 0,
-    threshold = 5,
-    eventType = "combat",
-    spellIds = {123, 456},     -- Optional: specific spell IDs to track
-    sourceOnly = true,         -- Optional: only count if player is source
-    destOnly = false          -- Optional: only count if player is target
-}
-```
+The addon is designed to be easily expandable. Instructions for adding new message types are provided in the README.
 
 ## File Structure
 
@@ -98,8 +60,8 @@ addon.messageTypes.newtype = {
 The addon uses the following saved variables structure:
 
 ```lua
-RangeCounterDB = {
-    messageTypes = {}, -- Stores counts for each message type
+ConditionCounterDB = {
+    conditionTypes = {},
     settings = {
         enableSound = true,
         enableWarnings = true,
@@ -122,10 +84,13 @@ Planned improvements:
 
 - 1.0.0: Initial release
   - Basic range message tracking
-  - Combat log framework with interrupt tracking
+  - Combat log framework with interrupt and failure tracking
   - Basic slash commands
   - Persistent storage of counters
   - Threshold notifications
+- 1.0.1: Bugfix update
+  - Fixed an issue with saved variables initialization
+  - Added support for spell cast failure events
 
 ## Contributing
 
@@ -158,7 +123,3 @@ SOFTWARE.
 ## Credits
 
 Created by VeePee
-
----
-
-_Note: This addon was created for World of Warcraft Retail version. It may need adjustments for other versions of the game._
