@@ -46,16 +46,28 @@ addon.messageTypes = {
 
 -- Initialize saved variables
 local function InitializeSavedVars()
-    if not ConditionCounterDB then
-        ConditionCounterDB = {
-            conditionTypes = {},
-            settings = {
-                enableSound = true,
-                enableWarnings = true,
-            }
+    ConditionCounterDB = ConditionCounterDB or {
+        conditionTypes = {},
+        settings = {
+            enableSound = true,
+            enableWarnings = true,
+            debug = false,
+            inCombatOnly = true
         }
-    end
+    }
     
+    -- Ensure all settings exist
+    for key, value in pairs({
+        enableSound = true,
+        enableWarnings = true,
+        debug = false,
+        inCombatOnly = true
+    }) do
+        if ConditionCounterDB.settings[key] == nil then
+            ConditionCounterDB.settings[key] = value
+        end
+    end
+        
     -- Initialize counters from saved data
     for msgType, data in pairs(addon.messageTypes) do
         if not ConditionCounterDB.conditionTypes[msgType] then
