@@ -1,5 +1,9 @@
+-- Import WeakAuras library
+local weakaura = LibStub("AceAddon-3.0"):GetAddon("WeakAuras")
+
 -- Companion namespace
 local addonName, addon = ...
+
 
 -- Define the icon settings for each message type
 local icons = {
