@@ -19,7 +19,7 @@ addon.messageTypes = {
         count = 0,
         threshold = 10,
         eventType = "error",
-        soundFile = "Interface\\AddOns\\ComabtLogEvent\\media\\range_error_sound.wav"  
+        soundFile = "Interface\\AddOns\\CombatLogEvent\\media\\range_error_sound.wav"  
     },
     facingError = {
         patterns = {
