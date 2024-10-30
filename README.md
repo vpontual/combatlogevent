@@ -1,15 +1,15 @@
-# Range Counter WoW Addon
+# Combat Log Event Counter WoW Addon
 
 ## Description
 
-Range Counter is a lightweight World of Warcraft addon that tracks various game messages and events. Initially created to count "out of range" messages during gameplay, it has been designed to be easily expandable for tracking additional message types and combat log events.
+Combat Log Event Counter (CLE) is a lightweight World of Warcraft addon that tracks various game messages and events. Initially created to count "out of range" messages during gameplay, it has been designed to be easily expandable for tracking additional message types and combat log events.
 
 Currently tracks:
 
 - Out of range messages
 - Line of sight issues
 - Distance-related errors
-- Spell interrupts (as an example combat log event)
+- Spell interrupts (including Counterspell)
 
 ## Features
 
@@ -27,24 +27,24 @@ Currently tracks:
    ```
    World of Warcraft\_retail_\Interface\AddOns\
    ```
-3. Make sure the folder is named "RangeCounter"
+3. Make sure the folder is named "CombatLogEvent"
 4. The folder should contain:
-   - RangeCounter.lua
-   - RangeCounter.toc
+   - combatlogevent.lua
+   - CombatLogEvent.toc
 
 ## Usage
 
 The addon responds to the following slash commands:
 
-- `/range` - Shows current counts for all tracked message types
-- `/range reset` - Resets all counters to zero
+- `/cle` - Shows current counts for all tracked message types
+- `/cle reset` - Resets all counters to zero
 
 ## Configuration
 
-Current thresholds and settings can be adjusted by modifying the values in the `messageTypes` table in `RangeCounter.lua`:
+Current thresholds and settings can be adjusted by modifying the values in the `addon.messageTypes` table in `combatlogevent.lua`:
 
 ```lua
-local messageTypes = {
+addon.messageTypes = {
     range = {
         threshold = 10,  -- Adjust this value to change notification threshold
         -- other settings...
@@ -59,7 +59,7 @@ The addon is designed to be easily expandable. To add new message types:
 ### For UI Error Messages:
 
 ```lua
-messageTypes.newtype = {
+addon.messageTypes.newtype = {
     patterns = {
         "error message to match",
         "another error pattern",
@@ -73,7 +73,7 @@ messageTypes.newtype = {
 ### For Combat Log Events:
 
 ```lua
-messageTypes.newtype = {
+addon.messageTypes.newtype = {
     patterns = {
         "SPELL_CAST_SUCCESS",  -- Combat log event type
         "SPELL_CAST_FAILED",   -- Can add multiple event types
@@ -89,36 +89,43 @@ messageTypes.newtype = {
 
 ## File Structure
 
-- `RangeCounter.toc` - Addon manifest file
-- `RangeCounter.lua` - Main addon code
+- `CombatLogEvent.toc` - Addon manifest file
+- `combatlogevent.lua` - Main addon code
 - `README.md` - This documentation file
 
-## Contributing
+## Saved Variables
 
-Feel free to fork and expand this addon. Some areas for potential improvement:
+The addon uses the following saved variables structure:
 
-- Add a configuration GUI
-- Track additional combat events
-- Add detailed statistics
-- Add visual/audio alerts
-- Add timing-based tracking
+```lua
+RangeCounterDB = {
+    messageTypes = {}, -- Stores counts for each message type
+    settings = {
+        enableSound = true,
+        enableWarnings = true,
+    }
+}
+```
 
-## TODOs
+## Future Enhancements
 
-Future enhancements could include:
+Planned improvements:
 
 - [ ] Configuration panel for settings
 - [ ] More detailed event logging
 - [ ] Export/import of statistics
 - [ ] Visual displays for tracked events
 - [ ] Integration with other addons
+- [ ] Additional combat log event tracking options
 
 ## Version History
 
-- 1.0: Initial release
+- 1.0.0: Initial release
   - Basic range message tracking
-  - Combat log framework
+  - Combat log framework with interrupt tracking
   - Basic slash commands
+  - Persistent storage of counters
+  - Threshold notifications
 
 ## Contributing
 
@@ -128,7 +135,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 MIT License
 
-Copyright (c) 2024 vpontual
+Copyright (c) 2024 VeePee
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -150,7 +157,7 @@ SOFTWARE.
 
 ## Credits
 
-Created by veepee
+Created by VeePee
 
 ---
 
