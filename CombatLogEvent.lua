@@ -195,6 +195,14 @@ frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 frame:SetScript("OnEvent", frame.OnEvent)
 
 -- Command handling
+local function ShowHelp()
+    print(string.format("|cFF00FF00%s commands:|r", addonName))
+    print("  /cle - Show current counts")
+    print("  /cle reset - Reset all counters to 0")
+    print("  /cle debug - Toggle debug mode")
+    print("  /cle help - Show this help message")
+end
+
 local function ShowCounts()
     for msgType, data in pairs(addon.messageTypes) do
         print(string.format("|cFF00FF00%s:|r %s messages: %d", 
@@ -213,6 +221,7 @@ end
 -- Debug command handler
 local function ToggleDebug()
     addon.debug = not addon.debug
+    ConditionCounterDB.settings.debug = addon.debug
     print(string.format("|cFF00FF00%s:|r Debug mode %s", 
         addonName, addon.debug and "enabled" or "disabled"))
 end
@@ -220,10 +229,13 @@ end
 -- Slash command handler
 local function SlashCommandHandler(msg)
     msg = msg and msg:lower() or ""
+    
     if msg == "reset" then
         ResetCounts()
     elseif msg == "debug" then
         ToggleDebug()
+    elseif msg == "help" then
+        ShowHelp()
     else
         ShowCounts()
     end
@@ -232,3 +244,39 @@ end
 -- Register slash commands
 SLASH_CLE1 = "/cle"
 SlashCmdList["CLE"] = SlashCommandHandler
+
+-- Update InitializeSavedVars function to include debug setting
+local function InitializeSavedVars()
+    if not ConditionCounterDB then
+        ConditionCounterDB = {
+            conditionTypes = {},
+            settings = {
+                enableSound = true,
+                enableWarnings = true,
+                debug = false
+            }
+        }
+    end
+    
+    -- Ensure settings exist
+    if not ConditionCounterDB.settings then
+        ConditionCounterDB.settings = {
+            enableSound = true,
+            enableWarnings = true,
+            debug = false
+        }
+    end
+    
+    -- Initialize counters from saved data
+    for msgType, data in pairs(addon.messageTypes) do
+        if not ConditionCounterDB.conditionTypes[msgType] then
+            ConditionCounterDB.conditionTypes[msgType] = {
+                count = 0,
+            }
+        end
+        data.count = ConditionCounterDB.conditionTypes[msgType].count
+    end
+    
+    -- Restore debug state
+    addon.debug = ConditionCounterDB.settings.debug
+end
