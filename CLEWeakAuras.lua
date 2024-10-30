@@ -40,18 +40,33 @@ local icons = {
 local displays = {}
 
 -- Create WeakAuras displays for each message type
+local defaultConfig = {
+    displayDuration = 3,
+    scale = 1,
+    position = {
+        x = 0,
+        y = 0,
+        relativeTo = "CENTER"
+    }
+}
+
 local function CreateWeakAurasDisplay(msgType, config)
+    -- Merge with defaults
+    config = config or {}
+    for k, v in pairs(defaultConfig) do
+        if config[k] == nil then
+            config[k] = v
+        end
+    end
+
     local display = {
-        id = string.format("CLE_%s", msgType),
+        id = format("CLE_%s", msgType),
         regionType = "icon",
         trigger = {
             type = "custom",
-            custom = string.format([[
+            custom = format([[
                 function(trigger)
-                    if trigger.msgType == "%s" then
-                        return true
-                    end
-                    return false
+                    return trigger.msgType == %q
                 end
             ]], msgType),
             events = {"CLE_MESSAGE"}
@@ -102,26 +117,36 @@ local function CreateWeakAurasDisplay(msgType, config)
     return display
 end
 
--- Initialize WeakAuras integration
-local function InitializeWeakAuras()
-    -- Ensure WeakAuras exists
-    if not WeakAuras then
-        print(string.format("|cFFFF0000%s:|r WeakAuras addon not found!", addonName))
+-- Error handling and validation
+local function SafeWeakAurasAdd(display)
+    if type(WeakAuras.Add) ~= "function" then
+        print(format("|cFFFF0000%s:|r WeakAuras.Add is not available", addonName))
         return false
     end
     
-    -- Create displays for each message type
+    local success, err = pcall(WeakAuras.Add, display)
+    if not success then
+        print(format("|cFFFF0000%s:|r Error adding WeakAura: %s", addonName, err))
+        return false
+    end
+    return true
+end
+
+-- Initialize WeakAuras integration
+local function InitializeWeakAuras()
+    if not WeakAuras then
+        print(format("|cFFFF0000%s:|r WeakAuras addon not found!", addonName))
+        return false
+    end
+    
     for msgType, config in pairs(icons) do
         if addon.messageTypes[msgType] then
             local display = CreateWeakAurasDisplay(msgType, config)
-            displays[msgType] = display
-            
-            -- Register display with WeakAuras
-            if WeakAuras.Add then
-                WeakAuras.Add(display)
-            else
-                print(string.format("|cFFFF0000%s:|r Error registering WeakAuras display for %s", 
-                    addonName, msgType))
+            if display then
+                displays[msgType] = display
+                if not SafeWeakAurasAdd(display) then
+                    return false
+                end
             end
         end
     end
@@ -131,23 +156,40 @@ end
 
 -- Update WeakAuras display when a message is processed
 local function UpdateDisplay(msgType)
-    if displays[msgType] and WeakAuras.ScanEvents then
-        WeakAuras.ScanEvents("CLE_MESSAGE", {msgType = msgType})
+    if not displays[msgType] then return end
+    if type(WeakAuras.ScanEvents) ~= "function" then
+        print(format("|cFFFF0000%s:|r WeakAuras.ScanEvents is not available", addonName))
+        return
     end
+    
+    WeakAuras.ScanEvents("CLE_MESSAGE", {msgType = msgType})
+end
+
+-- Cleanup function
+local function CleanupWeakAuras()
+    for msgType, display in pairs(displays) do
+        if WeakAuras.Delete then
+            WeakAuras.Delete(display.id)
+        end
+    end
+    displays = {}
 end
 
 -- Hook into the main addon's message processors
-local originalProcessErrorMessage = ProcessErrorMessage
-function ProcessErrorMessage(errorType, message)
+ProcessErrorMessage = function(errorType, message)
+    if type(originalProcessErrorMessage) ~= "function" then return end
+    
     local result = originalProcessErrorMessage(errorType, message)
     
-    -- Check if any patterns matched and update corresponding display
-    for msgType, data in pairs(addon.messageTypes) do
-        if data.eventType == "error" then
-            for _, pattern in ipairs(data.patterns) do
-                if message:lower():find(pattern, 1, true) then
-                    UpdateDisplay(msgType)
-                    break
+    if message then
+        local lowerMessage = message:lower()
+        for msgType, data in pairs(addon.messageTypes) do
+            if data.eventType == "error" then
+                for _, pattern in ipairs(data.patterns) do
+                    if lowerMessage:find(pattern, 1, true) then
+                        UpdateDisplay(msgType)
+                        break
+                    end
                 end
             end
         end
@@ -156,13 +198,12 @@ function ProcessErrorMessage(errorType, message)
     return result
 end
 
-local originalProcessCombatLogEvent = ProcessCombatLogEvent
-function ProcessCombatLogEvent(...)
-    local result = originalProcessCombatLogEvent(...)
+ProcessCombatLogEvent = function(...)
+    if type(originalProcessCombatLogEvent) ~= "function" then return end
     
+    local result = originalProcessCombatLogEvent(...)
     local timestamp, eventType = ...
     
-    -- Check if any patterns matched and update corresponding display
     for msgType, data in pairs(addon.messageTypes) do
         if data.eventType == "combat" then
             for _, pattern in ipairs(data.patterns) do
@@ -178,13 +219,14 @@ function ProcessCombatLogEvent(...)
 end
 
 -- Function to load WeakAuras integration
-function LoadWeakAurasCompanion()
+addon.LoadWeakAurasCompanion = function()
     local loaded = InitializeWeakAuras()
     if loaded then
-        print(string.format("|cFF00FF00%s:|r WeakAuras integration loaded successfully!", addonName))
+        print(format("|cFF00FF00%s:|r WeakAuras integration loaded successfully!", addonName))
     end
 end
 
 -- Export functions for use in main addon
 addon.LoadWeakAurasCompanion = LoadWeakAurasCompanion
 addon.UpdateWeakAurasDisplay = UpdateDisplay
+addon.CleanupWeakAuras = CleanupWeakAuras
