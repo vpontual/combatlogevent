@@ -87,9 +87,14 @@ local function ProcessErrorMessage(errorType, message)
             for _, pattern in ipairs(data.patterns) do
                 if lowerMessage:find(pattern, 1, true) then
                     data.count = data.count + 1
-                    RangeCounterDB.messageTypes[msgType].count = data.count
+                    ConditionCounterDB.conditionTypes[msgType].count = data.count
                     
                     DebugPrint("Matched pattern:", pattern, "New count:", data.count)
+                    
+                    -- Play the sound file for this category
+                    if data.soundFile then
+                        PlaySoundFile(data.soundFile)
+                    end
                     
                     if data.threshold and data.count >= data.threshold then
                         print(string.format("|cFF00FF00%s:|r Threshold reached for %s! Count: %d", 
@@ -101,7 +106,7 @@ local function ProcessErrorMessage(errorType, message)
             end
         end
     end
-    
+
     DebugPrint("No pattern match found")
 end
 
