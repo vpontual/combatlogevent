@@ -19,7 +19,7 @@ addon.messageTypes = {
         count = 0,
         threshold = 10,
         eventType = "error",
-        soundFile = "range_error_sound.wav"  
+        soundFile = "Interface\\AddOns\\ComabtLogEvent\\media\\range_error_sound.wav"  
     },
     facingError = {
         patterns = {
@@ -28,8 +28,8 @@ addon.messageTypes = {
         count = 0,
         threshold = 10,
         eventType = "error",
-        soundFile = "facing_error_sound.wav"  
-    },    -- Combat log message type
+        soundFile = "Interface\\AddOns\\CombatLogEvent\\media\\facing_error_sound.wav"  
+    },
     interrupted = {
         patterns = {
             "SPELL_INTERRUPT",
