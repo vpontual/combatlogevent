@@ -27,7 +27,9 @@ addon.messageTypes = {
     },
     facingError = {
         patterns = {
-            "not facing the target"
+            "not facing the target",
+            "facing the wrong direction",
+			"must face the target"
         },
         count = 0,
         threshold = 10,
