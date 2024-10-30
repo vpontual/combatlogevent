@@ -2,6 +2,10 @@
 local addonName, addon = ...
 addon.version = "1.2.0"
 
+-- Create frames
+local frame = CreateFrame("Frame")
+local combatFrame = CreateFrame("Frame")
+
 -- Message categories and their patterns
 addon.messageTypes = {
     -- Range messages using UI error events
@@ -182,9 +186,6 @@ local function ProcessCombatLogEvent(...)
     end
 end
 
--- Create main addon frame
-local frame = CreateFrame("Frame")
-
 -- Event handlers
 function frame:PLAYER_LOGIN(event)
     InitializeSavedVars()
@@ -313,6 +314,7 @@ local function SlashCommandHandler(msg)
         ShowCounts()
     end
 end
+
 -- Register slash commands
 SLASH_CLE1 = "/cle"
 SlashCmdList["CLE"] = SlashCommandHandler
